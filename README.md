@@ -18,9 +18,9 @@ It's straightforward to implement other data sources like web scrapers, local mo
 
 # Requirements
 
-* Python 3.3+ (tested with 3.5, more to follow)
+* Python 3.5+ (tested with Python 3.5, 3.6 and 3.7)
 
-More to follow, probably feedparser.
+The "feedparser" module will most likely be required in the future.
 
 
 # Installation
@@ -35,7 +35,11 @@ Run `run.py`. This might change in the future: the code is still a work in progr
 
 # Tests
 
-Not implemented yet.
+This application includes a test suite, you can run it with:
+
+    run-tests.py
+
+Tests are written with Python's built-in `unittest` package, there currently are no other dependencies.
 
 
 # Legal

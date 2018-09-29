@@ -1,23 +1,26 @@
 from abc import ABC, abstractmethod
+from typing import List,Union
+
+from domain import *
+
 
 class Storage(ABC):
   @abstractmethod
-  def getFeeds(self):
+  def getFeeds(self) -> List[Feed]:
     pass
 
   @abstractmethod
-  def getFeedByID(self, id):
+  def getFeedByID(self, id:int) -> Union[Feed,None]:
     pass
 
   @abstractmethod
-  def putFeed(self, feed):
+  def putFeed(self, feed:Feed) -> None:
     pass
 
   @abstractmethod
-  def getItemsByFeedID(self, feed_id):
+  def getItemsByFeedID(self, feed_id:int) -> List[Item]:
     pass
 
   @abstractmethod
-  def putItem(self, item):
+  def putItem(self, item:Item) -> None:
     pass
-

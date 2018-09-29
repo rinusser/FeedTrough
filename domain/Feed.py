@@ -12,3 +12,8 @@ class Feed:
   lastChanged=None    #rss.lastBuildDate, as datetime.datetime
 
   items=[]
+
+
+  def __init__(self):
+    self.items=[]
+
