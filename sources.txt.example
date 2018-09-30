@@ -1,0 +1,13 @@
+# This file contains a list of feed sources.
+# Lines starting with # are considered comments. Comments and empty lines are ignored.
+#
+# Source lines are formatted as:
+#
+#   type: url
+#
+# Whitespaces around the colon are ignored.
+# The type must be handled in a source (via Source.name, currently "dummy" and "feed"), the URL has source-specific meaning.
+#
+
+feed: https://feedforall.com/sample.xml
+dummy: http://localhost:12356/feed/123

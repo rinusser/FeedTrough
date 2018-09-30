@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+<channel>
+  <title>Minimal RSS 2.0</title>
+  <link>http://test/rss20.minimal</link>
+  <description></description>
+  <item>
+    <title>item 1</title>
+  </item>
+  <item>
+    <description>desc 2</description>
+  </item>
+</channel>
+</rss>

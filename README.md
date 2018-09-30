@@ -19,18 +19,21 @@ It's straightforward to implement other data sources like web scrapers, local mo
 # Requirements
 
 * Python 3.5+ (tested with Python 3.5, 3.6 and 3.7)
-
-The "feedparser" module will most likely be required in the future.
+* feedparser (tested with 5.2.1)
 
 
 # Installation
 
-Just download the sources and make sure Python is installed.
+Just download the sources and make sure Python and feedparser (`pip install feedparser`) are installed.
 
 
 # Usage
 
 Run `run.py`. This might change in the future: the code is still a work in progress.
+
+### Configuration
+
+The list of feeds is read from `sources.txt`. There is an example configuration, along with documentation, in `sources.txt.example`.
 
 
 # Tests

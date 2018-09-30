@@ -1,5 +1,5 @@
 def dump_item(item, details=True):
-  print("  item id=%d"%item.id)
+  print("  item id=%s"%item.id)
   if details:
     print("    feedID=%d"%item.feedID)
     print("    guid=%s"%item.guid)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Atom 1.0</title>
+  <updated>2018-09-28T18:16:14Z</updated>
+  <id>http://test/atom10</id>
+  <entry>
+    <title>title 1</title>
+    <id>http://test/atom10/1</id>
+    <updated>2018-09-28T20:16:14+02:00</updated>
+  </entry>
+  <entry>
+    <title>title 2</title>
+    <id>http://test/atom10/2</id>
+    <updated>2018-08-01T02:03:04+07:00</updated>
+  </entry>
+</feed>

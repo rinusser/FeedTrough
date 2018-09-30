@@ -25,7 +25,10 @@ class StandaloneScheduler(Scheduler):
     now=datetime.now()
     deltas=[]
     for feed in feeds:
-      next_update_at=feed.lastRefreshed+feed.updateInterval
+      if feed.lastRefreshed!=None:
+        next_update_at=feed.lastRefreshed+feed.updateInterval
+      else:
+        next_update_at=now
       next_update_delta=(next_update_at-now).total_seconds()
 #      print("feed %d, lastRefreshed=%s, interval=%s => next update delta: %5.2f"%(feed.id,feed.lastRefreshed,feed.updateInterval,next_update_delta))
       if next_update_delta>0:

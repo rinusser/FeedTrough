@@ -7,28 +7,25 @@ from scheduler import *
 from storage import *
 from source import *
 from debug import *
+import config
 
 
-next_item_id=1
-
-def create_feed():
-  global source
-  feed=Feed()
-  feed.sourceName="dummy"
-  feed.feedURL="http://localhost:12356/feed/%s"%uuid4()
-  feed.items=[]
-  source.updateFeed(feed)
-  sleep(0.11111)
-  return feed
+next_feed_id=1
 
 db=InMemoryStorage()
-source=DummySource()
+sources=[DummySource(),FeedSource()]
 
-for i in range(1,4):
-  feed=create_feed()
+for type,url in config.sources:
+  print("got source type %s: %s"%(type,url))
+  feed=Feed()
+  feed.id=next_feed_id
+  next_feed_id+=1
+  feed.sourceName=type
+  feed.feedURL=url
+  feed.updateInterval=timedelta(minutes=5)
   db.putFeed(feed)
 
-scheduler=StandaloneScheduler(db,[source])
+scheduler=StandaloneScheduler(db,sources)
 scheduler.run()
 
 print("done")

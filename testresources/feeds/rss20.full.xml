@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+<channel>
+  <title>Full RSS 2.0</title>
+  <link>http://test/rss.full</link>
+  <description>ad space for rent</description>
+  <pubDate>Sun, 30 Sep 2018 02:30:00 CEST</pubDate>
+  <lastBuildDate>Sun, 30 Sep 2018 02:00:00 CEST</lastBuildDate>
+  <ttl>123</ttl>
+  <item>
+    <title>item title</title>
+    <link>http://test/rss20.full#1</link>
+    <description>item description</description>
+    <guid>uri://feedtrough/rss20/full#1</guid>
+    <pubDate>Sun, 30 Sep 2018 02:00:00 CEST</pubDate>
+  </item>
+  <item>
+    <title>older title</title>
+    <link>http://test/rss20.full#2</link>
+    <description>older description</description>
+    <guid>uri://feedtrough/rss20/full#2</guid>
+    <pubDate>Sat, 29 Sep 2018 06:34:56 EDT</pubDate>
+  </item>
+</channel>
+</rss>
