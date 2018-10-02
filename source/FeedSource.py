@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import string
-from time import strftime
+from time import strftime, sleep
 from typing import List
 import unittest
 
@@ -18,7 +18,6 @@ class FeedSource(Source):
 
   def updateFeed(self, feed:Feed) -> None:
     result=feedparser.parse(feed.feedURL)
-#    print(result)
 
     update_minutes=60
     if "ttl" in result.feed:
@@ -67,6 +66,8 @@ class TestFeedSource(unittest.TestCase):
   @classmethod
   def setUpClass(clazz):
     testutils.Server().start()
+    sleep(0.2) #wait server thread to start
+
 
   def testMinimalRSS20(self):
     feed=self._readFeed("http://127.0.0.1:58050/testresources/feeds/rss20.minimal.xml")

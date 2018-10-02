@@ -5,6 +5,7 @@ from uuid import uuid4
 from domain import *
 from scheduler import *
 from storage import *
+from server import *
 from source import *
 from debug import *
 import config
@@ -26,6 +27,11 @@ for type,url in config.sources:
   db.putFeed(feed)
 
 scheduler=StandaloneScheduler(db,sources)
-scheduler.run()
+scheduler.start()
+
+server=FeedServer(db)
+server.start()
+
+sleep(60)
 
 print("done")

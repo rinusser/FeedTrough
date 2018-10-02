@@ -20,11 +20,13 @@ It's straightforward to implement other data sources like web scrapers, local mo
 
 * Python 3.5+ (tested with Python 3.5, 3.6 and 3.7)
 * feedparser (tested with 5.2.1)
+* PyRSS2Gen (tested with 1.1)
 
 
 # Installation
 
-Just download the sources and make sure Python and feedparser (`pip install feedparser`) are installed.
+Just download the sources and make sure Python, feedparser (`pip install feedparser`) and
+PyRSS2Gen (`pip install pyrss2gen`) are installed.
 
 
 # Usage
