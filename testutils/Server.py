@@ -17,6 +17,5 @@ class Server(threading.Thread):
 
   def run(self):
     self._socket=socketserver.TCPServer(("127.0.0.1",self.port),SilentRequestHandler)
-#    print("listening on port %d"%self.port)
     self._socket.serve_forever()
 

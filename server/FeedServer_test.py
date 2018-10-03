@@ -31,7 +31,7 @@ class TestFeedServer(unittest.TestCase):
     feed2.items.append(item22)
     storage.putFeed(feed2)
 
-    FeedServer(storage,silent=True).start()
+    FeedServer(storage).start()
 
 
   def testFeedPresentation(self):

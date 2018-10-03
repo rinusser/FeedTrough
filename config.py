@@ -1,3 +1,7 @@
+import logger
+
+log=logger.get_logger(__name__)
+
 sources=[
 ]
 
@@ -10,5 +14,5 @@ try:
     sources.append((type.strip(),url.strip()))
   f.close()
 except FileNotFoundError:
-  print("no sources.txt found") #TODO FT-8: change to logging
+  log.warn("no sources.txt found")
 

@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from domain import *
+import logger
 from scheduler import *
 from source import *
 from storage import *
@@ -11,14 +12,24 @@ from storage import *
 from debug import *
 
 
+log=logger.get_logger(__name__)
+
+
 class StandaloneScheduler(Scheduler):
-  def run(self, iteration_limit:int=20) -> None:
-    for i in range(0,iteration_limit):
+  def run(self, iteration_limit:int=0) -> None:
+    i=0
+    while True:
+      log.debug("starting scheduler iteration...")
       wait=self._checkAll()
+      if wait==None:
+        return
 #      dump_feeds(self.storage.getFeeds(),details=False)
 #      print("waiting %5.2fs..."%wait)
+      i=i+1
+      if iteration_limit>0 and i>=iteration_limit:
+        break
       sleep(wait)
-#    print("exiting scheduler")
+    log.info("reached iteration limit, exiting scheduler")
 
   def _checkAll(self) -> float:
     feeds=self.storage.getFeeds()
@@ -36,6 +47,9 @@ class StandaloneScheduler(Scheduler):
       else:
         self._updateFeed(feed)
         deltas.append(feed.updateInterval.total_seconds())
+    if len(deltas)<1:
+      log.warn("no more feeds to update, exiting scheduler")
+      return None
     wait=min(deltas)
 #    print("deltas: %s => waiting %s"%(deltas,wait))
     return wait

@@ -3,8 +3,12 @@ import io
 import socketserver
 import threading
 
+import logger
 from server import *
 from storage import *
+
+
+log=logger.get_logger(__name__)
 
 
 class FeedHandler(http.server.BaseHTTPRequestHandler):
@@ -59,18 +63,15 @@ class FeedServer(threading.Thread):
   _socket=None
   storage=None
   renderer=None
-  silent=False
 
-  def __init__(self, storage:Storage, silent:bool=False):
+  def __init__(self, storage:Storage):
     super().__init__(daemon=True)
     self.storage=storage
     self.renderer=XMLRenderer()
-    self.silent=silent
 
   def run(self):
     self._socket=TCPServer(("127.0.0.1",self.port),FeedHandler)
     self._socket.storage=self.storage
     self._socket.renderer=self.renderer
-    if not self.silent:
-      print("listening on port %d"%self.port)
+    log.info("listening on port %d",self.port)
     self._socket.serve_forever()
