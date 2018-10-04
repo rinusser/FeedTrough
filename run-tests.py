@@ -7,8 +7,13 @@ from server import *
 from source import *
 from storage import *
 
-log=logger.get_logger(__name__)
-logger.register_handler(logging.NOTSET)
 
-unittest.main()
+def run():
+  log=logger.get_logger(__name__)
+  logger.register_handler(logging.NOTSET)
 
+  unittest.main()
+
+
+if __name__=="__main__":
+  run()

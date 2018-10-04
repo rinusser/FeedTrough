@@ -7,16 +7,28 @@ from source import *
 
 
 class DummySource(Source):
-  feedURLs=[]
-  update_count=0
-  next_item_id=1
-  keepUpdateInterval=False
+  """A dummy data source, generates deterministic data that's probably useless outside of tests.
+  """
+
+  _feedURLs=[]
+  _update_count=0
+  _next_item_id=1
+  keepUpdateInterval=False  #: whether to keep the feed's original update intervals (default: False)
 
   @property
   def name(self) -> str:
+    """the identifier for this source, 'dummy'
+    """
     return "dummy"
 
   def updateFeed(self, feed:Feed, skip_items=False) -> None:
+    """Updates the given feed.
+
+    Items are added on every other invocation of this method, regardless of which feed is passed.
+
+    :param Feed feed: the feed to update
+    :param bool skip_items: whether to skip adding items (default: False)
+    """
     feed.id=self._getFeedID(feed)
     if not self.keepUpdateInterval:
       feed.updateInterval=timedelta(seconds=feed.id)
@@ -26,9 +38,9 @@ class DummySource(Source):
     feed.lastRefreshed=datetime.now()
     feed.sourceName=self.name
 
-    if self.update_count%2==0 and not skip_items:
+    if self._update_count%2==0 and not skip_items:
       feed.items.append(self._createItem(feed))
-    self.update_count+=1
+    self._update_count+=1
 
     if len(feed.items)>1:
       max=feed.items[0].publicationDate
@@ -42,8 +54,8 @@ class DummySource(Source):
 
   def _createItem(self, feed:Feed) -> Item:
     item=Item()
-    item.id=self.next_item_id
-    self.next_item_id+=1
+    item.id=self._next_item_id
+    self._next_item_id+=1
     item.feedID=feed.id
     item.guid="urn://feedtrough/%d/%d"%(feed.id,item.id)
     item.title="item %d title"%item.id
@@ -57,16 +69,21 @@ class DummySource(Source):
       return feed.id
 
     try:
-      id=self.feedURLs.index(feed.feedURL)+1
+      id=self._feedURLs.index(feed._feedURL)+1
     except ValueError:
-      self.feedURLs.append(feed.feedURL)
-      id=len(self.feedURLs)
+      self._feedURLs.append(feed._feedURL)
+      id=len(self._feedURLs)
 
     return id
 
 
 class TestDummySource(unittest.TestCase):
+  """Tests for DummySource.
+  """
+
   def testItemIDUniqueness(self):
+    """Tests whether generated item IDs are unique.
+    """
     feed=Feed()
     feed.id=15
     source=DummySource()
@@ -84,6 +101,8 @@ class TestDummySource(unittest.TestCase):
 
 
   def testFeedIDIsSetCorrectly(self):
+    """Tests whether items' feed ID is set correctly.
+    """
     feed1=Feed()
     feed1.id=20
     feed2=Feed()

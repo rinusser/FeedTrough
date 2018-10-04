@@ -5,7 +5,16 @@ from domain import *
 
 
 class XMLRenderer:
+  """Utility class for turning Feed objects into XML.
+  """
+
   def renderFeed(self, feed:Feed) -> str:
+    """Turns a Feed domain object into RSS XML.
+
+    :param Feed feed: the input feed
+    :return: the RSS 2.0 XML string
+    :rtype: str
+    """
     items=[]
     for item in feed.items:
       items.append(RSSItem(title=item.title,

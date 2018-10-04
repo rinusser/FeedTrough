@@ -12,10 +12,17 @@ log=logger.get_logger(__name__)
 
 
 class FeedHandler(http.server.BaseHTTPRequestHandler):
+  """HTTP request handler implementation serving stored feeds as RSS 2.0 XML.
+  """
+
   def log_message(self, format, *args):
+    """logging callback, silently discards messages.
+    """
     pass
 
   def do_GET(self):
+    """callback for HTTP GET requests, serves feeds and denies everything else.
+    """
     if not self.path.startswith("/feed/"):
       return self._send404("only /feed/<id> is implemented")
 
@@ -54,22 +61,36 @@ class FeedHandler(http.server.BaseHTTPRequestHandler):
 
 
 class TCPServer(socketserver.TCPServer):
-  storage=None
-  renderer=None
+  """Utility class, contains references to Storage and Renderer implementations for handlers.
+  """
+  storage=None  #: the storage to use, as storage.Storage
+  renderer=None #: the renderer to use, usually XMLRenderer
 
 
 class FeedServer(threading.Thread):
-  port=58000
+  """The HTTP server for feeds.
+
+  This class extends threading.Thread: call start() to spawn it in the background.
+  """
+
+  port=58000    #: the TCP port to listen on
   _socket=None
-  storage=None
-  renderer=None
+  storage=None  #: the storage handler to use, will be initialized by the constructor
+  renderer=None #: the XML renderer to use, will be initialized by the constructor
 
   def __init__(self, storage:Storage):
+    """
+    :param Storage storage: the storage handler to read feeds from
+    """
     super().__init__(daemon=True)
     self.storage=storage
     self.renderer=XMLRenderer()
 
   def run(self):
+    """main worker method for the server
+
+    You'll probably want to call .start() instead.
+    """
     self._socket=TCPServer(("127.0.0.1",self.port),FeedHandler)
     self._socket.storage=self.storage
     self._socket.renderer=self.renderer

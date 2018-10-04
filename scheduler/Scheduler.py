@@ -7,17 +7,26 @@ from storage import Storage
 
 
 class Scheduler(threading.Thread, ABC):
-  storage=None
-  sources=None
+  """Abstract base class for schedulers.
+  """
+
+  _storage=None
+  _sources=None
 
   def __init__(self, storage:Storage, sources:List[Source]):
+    """
+    :param Storage storage: where to read/write feed data from/to
+    :param List[Source] sources: the sources to use for feed updates
+    """
     super().__init__(daemon=True)
-    self.storage=storage
-    self.sources={}
+    self._storage=storage
+    self._sources={}
     for source in sources:
-      self.sources[source.name]=source
+      self._sources[source.name]=source
 
   @abstractmethod
   def run(self) -> None:
+    """abstract: this method should contain the scheduler's implementation.
+    """
     pass
 

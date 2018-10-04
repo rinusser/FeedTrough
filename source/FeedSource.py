@@ -12,11 +12,20 @@ import testutils
 
 
 class FeedSource(Source):
+  """An RSS/Atom feed source.
+  """
+
   @property
   def name(self) -> str:
+    """the unique source identifier for this source, 'feed'
+    """
     return "feed"
 
   def updateFeed(self, feed:Feed) -> None:
+    """refreshes an RSS/Atom feed from its feed URL
+
+    :param Feed feed: the feed to update
+    """
     result=feedparser.parse(feed.feedURL)
 
     update_minutes=60
@@ -63,13 +72,20 @@ class FeedSource(Source):
 
 
 class TestFeedSource(unittest.TestCase):
+  """Tests for FeedSource.
+  """
+
   @classmethod
   def setUpClass(clazz):
+    """test class fixture, called by unittest
+    """
     testutils.Server().start()
     sleep(0.2) #wait server thread to start
 
 
   def testMinimalRSS20(self):
+    """Tests the basics of an RSS 2.0 feed.
+    """
     feed=self._readFeed("http://127.0.0.1:58050/testresources/feeds/rss20.minimal.xml")
     self.assertEqual("Minimal RSS 2.0",feed.title)
     self.assertEqual("http://test/rss20.minimal",feed.websiteURL)
@@ -78,6 +94,8 @@ class TestFeedSource(unittest.TestCase):
     self.assertEqual("desc 2",feed.items[1].description)
 
   def testFullRSS20(self):
+    """Tests the optional fields in an RSS 2.0 feed.
+    """
     feed=self._readFeed("http://127.0.0.1:58050/testresources/feeds/rss20.full.xml")
     self.assertEqual(123*60,             feed.updateInterval.total_seconds())
     self.assertEqual("ad space for rent",feed.description)
@@ -89,12 +107,16 @@ class TestFeedSource(unittest.TestCase):
     self._assertUTCDate("2018-09-29 10:34:56",feed.items[1].publicationDate)
 
   def testRSS10Dates(self):
+    """Tests date formatting in an RSS 1.0 feed
+    """
     feed=self._readFeed("http://127.0.0.1:58050/testresources/feeds/rss10.full.xml")
     self._assertUTCDate("2018-09-30 09:11:12",feed.lastChanged)
     self._assertUTCDate("2018-09-30 09:11:12",feed.items[0].publicationDate)
     self._assertUTCDate("2018-09-21 12:01:01",feed.items[2].publicationDate)
 
   def testAtom10(self):
+    """Tests Atom 1.0 feeds
+    """
     feed=self._readFeed("http://127.0.0.1:58050/testresources/feeds/atom10.example.xml")
     self.assertEqual("Atom 1.0",feed.title)
     self._assertUTCDate("2018-09-28 18:16:14",feed.lastChanged)

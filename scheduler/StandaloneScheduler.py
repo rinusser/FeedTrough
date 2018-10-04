@@ -16,7 +16,19 @@ log=logger.get_logger(__name__)
 
 
 class StandaloneScheduler(Scheduler):
+  """A basic scheduler implementation.
+
+  This scheduler reads each feed's last update time and waits until the feed's update interval has passed, then updates the feed from the appropriate source.
+  """
+
   def run(self, iteration_limit:int=0) -> None:
+    """Starts the scheduler.
+
+    Schedulers are threads: unless you're testing the scheduler you'll probably want to call .start() instead.
+
+    :param int iteration_limit: how many iterations to perform, <=0 for no limit.
+    """
+
     i=0
     while True:
       log.debug("starting scheduler iteration...")
@@ -32,7 +44,7 @@ class StandaloneScheduler(Scheduler):
     log.info("reached iteration limit, exiting scheduler")
 
   def _checkAll(self) -> float:
-    feeds=self.storage.getFeeds()
+    feeds=self._storage.getFeeds()
     now=datetime.now()
     deltas=[]
     for feed in feeds:
@@ -55,12 +67,20 @@ class StandaloneScheduler(Scheduler):
     return wait
 
   def _updateFeed(self, feed:Feed):
-    self.sources[feed.sourceName].updateFeed(feed)
-    self.storage.putFeed(feed)
+    self._sources[feed.sourceName].updateFeed(feed)
+    self._storage.putFeed(feed)
 
 
 class TestStandaloneScheduler(unittest.TestCase):
+  """Tests for StandaloneScheduler
+  """
+
   def testUpdateOrder(self):
+    """Tests whether the scheduler updates feeds in the correct order.
+
+    The combination of feed update intervals, DummySource's sequential item ID generation and DummySource's adding of items on
+    every other refresh results in deterministic article assignment in feeds. This is tested for here.
+    """
     storage=InMemoryStorage()
     source=DummySource()
     now=datetime.now()
@@ -74,8 +94,6 @@ class TestStandaloneScheduler(unittest.TestCase):
     actuals=storage.getFeeds()
     self.assertEqual(2,len(actuals),"self-check: should have 2 feeds stored")
 
-    # The combination of feed update intervals, DummySource's sequential item ID generation and DummySource's adding of items on
-    # every other refresh results in deterministic article assignment in feeds. This is tested for here.
     self._assertItemIDs([1,3],actuals[0])
     self._assertItemIDs([2],  actuals[1])
 

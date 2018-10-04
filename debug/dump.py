@@ -1,4 +1,14 @@
-def dump_item(item, details=True):
+from typing import List
+
+from domain import *
+
+
+def dump_item(item:Item, details:bool=True):
+  """Prints Item data to stdout.
+
+  :param Item item: the item to dump
+  :param bool details: whether to include item details (default: True)
+  """
   print("  item id=%s"%item.id)
   if details:
     print("    feedID=%d"%item.feedID)
@@ -9,7 +19,13 @@ def dump_item(item, details=True):
     print("    itemURL=%s"%item.itemURL)
     print("    publicationDate=%s"%item.publicationDate)
 
-def dump_feed(feed, hint=None, details=True):
+def dump_feed(feed:Feed, hint=None, details:bool=True):
+  """Prints Feed data to stdout.
+
+  :param Feed feed: the feed to dump
+  :param str hint: a feed description to include (default: None)
+  :param bool details: whether to include feed details (default: True)
+  """
   hint_text=""
   if hint!=None:
     hint_text=" (%s)"%hint
@@ -26,7 +42,12 @@ def dump_feed(feed, hint=None, details=True):
   for item in feed.items:
     dump_item(item,details=details)
 
-def dump_feeds(feeds,details=True):
+def dump_feeds(feeds:List[Feed],details:bool=True):
+  """Prints multiple Feeds' data to stdout.
+
+  :param List[Feed] feed: the feeds to dump
+  :param bool details: whether to include feed details (default: True)
+  """
   for feed in feeds:
     dump_feed(feed,details=details)
 

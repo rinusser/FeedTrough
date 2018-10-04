@@ -7,35 +7,49 @@ from copy import deepcopy
 
 
 class InMemoryStorage(Storage):
-  feeds=[]
+  """Non-persistent storage implementation.
+
+  This storage adapter keeps feeds and items in memory only: upon application shutdown all data is lost.
+  """
+  _feeds=[]
 
   def __init__(self):
-    self.feeds=[]
+    self._feeds=[]
 
   def getFeeds(self) -> List[Feed]:
-    return self.feeds
+    """returns a list of all feeds
+    """
+    return self._feeds
 
   def getFeedByID(self, id:int) -> Union[Feed,None]:
-    for feed in self.feeds:
+    """looks up an individual feed by ID
+    """
+    for feed in self._feeds:
       if feed.id==id:
         return feed
     return None
 
   def putFeed(self, feed:Feed) -> None:
+    """stores an individual feed
+    """
     cp=deepcopy(feed)
-    for ti,local in enumerate(self.feeds):
+    for ti,local in enumerate(self._feeds):
       if local.id==cp.id:
-        self.feeds[ti]=cp
+        self._feeds[ti]=cp
         return
-    self.feeds.append(cp)
+    self._feeds.append(cp)
 
   def getItemsByFeedID(self, feed_id:int) -> List[Item]:
+    """looks up a feed's items
+    """
     feed=self.getFeedByID(feed_id)
     if feed==None:
       return []
     return feed.items
 
   def putItem(self, item:Item) -> None:
+    """stores an individual item, if the parent feed is stored already
+    """
     feed=self.getFeedByID(item.feedID)
     if feed==None:
       return
@@ -43,7 +57,12 @@ class InMemoryStorage(Storage):
 
 
 class TestInMemoryStorage(unittest.TestCase):
+  """Tests for the InMemoryStorage class.
+  """
+
   def testEmptyStorage(self):
+    """Tests whether an empty storage doesn't find any contents.
+    """
     storage=InMemoryStorage()
 
     self.assertEqual([],  storage.getFeeds(),         "empty storage should not have any contents")
@@ -52,6 +71,8 @@ class TestInMemoryStorage(unittest.TestCase):
 
 
   def testMultipleStorageSeparation(self):
+    """Tests whether multiple instances keep separate data.
+    """
     storage1=InMemoryStorage()
     storage2=InMemoryStorage()
     feed=Feed()
@@ -75,6 +96,8 @@ class TestInMemoryStorage(unittest.TestCase):
 
 
   def testPutFeed(self):
+    """Tests whether .putFeed() stores data independently from live objects.
+    """
     storage=InMemoryStorage()
     feed=Feed()
     feed.id=123
@@ -103,6 +126,8 @@ class TestInMemoryStorage(unittest.TestCase):
 
 
   def testPutItem(self):
+    """Tests whether .putItem() properly adds items.
+    """
     storage=InMemoryStorage()
     feed=Feed()
     feed.id=9
