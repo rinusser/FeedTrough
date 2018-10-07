@@ -7,8 +7,14 @@ import unittest
 import feedparser
 
 from domain import *
+from logger import get_logger
 from source import *
 import testutils
+
+#from debug import *
+
+
+log=get_logger(__name__)
 
 
 class FeedSource(Source):
@@ -39,7 +45,6 @@ class FeedSource(Source):
     feed.lastRefreshed=datetime.now()
     feed.lastChanged=self._parseDateTime(result.version,"updated",result.feed)
 
-    feed.items=[]
     for entry in result.entries:
       item=Item()
       item.feedID=feed.id
@@ -54,7 +59,34 @@ class FeedSource(Source):
       item.publicationDate=self._parseDateTime(result.version,"updated",entry)
       if item.publicationDate==None:
         item.publicationDate=self._parseDateTime(result.version,"published",entry)
-      feed.items.append(item)
+      self._mergeItem(feed,item)
+#    dump_feed(feed)
+
+  def _mergeItem(self,feed,item): #TODO: add test
+    for ti,existing in enumerate(feed.items):
+      log.debug("merge: comparing (%s,%s) against (%s,%s)",item.guid,item.itemURL,existing.guid,existing.itemURL)
+      existing_id=existing.id
+      if item.guid!=None:
+        if item.guid!=existing.guid:
+          log.debug("merge: guid mismatch, can't be same")
+          continue
+        else:
+          log.debug("merge: guid match, updating")
+          item.id=existing_id
+          feed.items[ti]=item
+          return
+      if item.itemURL!=None:
+        if item.itemURL!=existing.itemURL:
+          log.debug("merge: itemURL mismatch, can't be same")
+          continue
+        else:
+          log.debug("merge: itemURL match, updating")
+          item.id=existing_id
+          feed.items[ti]=item
+          return
+    log.debug("inserting item")
+    feed.items.append(item)
+
 
   def _parseDateTime(self,version,key,source):
     if key in source and version=="rss20":

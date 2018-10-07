@@ -27,4 +27,4 @@ class XMLRenderer:
              description=feed.description,
              lastBuildDate=feed.lastRefreshed,
              items=items)
-    return rss.to_xml()
+    return rss.to_xml(encoding='utf-8')

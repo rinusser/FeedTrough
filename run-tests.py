@@ -12,7 +12,7 @@ def run():
   log=logger.get_logger(__name__)
   logger.register_handler(logging.NOTSET)
 
-  unittest.main()
+  unittest.main(verbosity=1)
 
 
 if __name__=="__main__":

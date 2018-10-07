@@ -5,3 +5,4 @@ __pycache__
 /Dockerfile*
 /build/*
 /doc/api/*
+/*.sqlite

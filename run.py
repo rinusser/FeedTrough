@@ -18,7 +18,8 @@ def run():
   logger.register_handler(logging.INFO)
   next_feed_id=1
 
-  db=InMemoryStorage()
+#  db=InMemoryStorage()
+  db=SQLiteStorage("feeds.sqlite")
   sources=[DummySource(),FeedSource()]
 
   for type,url in config.sources:
@@ -37,7 +38,10 @@ def run():
   server=FeedServer(db)
   server.start()
 
-  sleep(60)
+  try:
+    sleep(60)
+  except KeyboardInterrupt:
+    pass
 
   log.info("exiting application")
 

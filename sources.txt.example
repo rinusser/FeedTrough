@@ -8,6 +8,11 @@
 # Whitespaces around the colon are ignored.
 # The type must be handled in a source (via Source.name, currently "dummy" and "feed"), the URL has source-specific meaning.
 #
+#
+# WARNING: The "dummy" type source will overwrite other feeds' stored items!
+#          DummySource generates item IDs sequentially, independently of the storage layer, thus ignoring existing stored item IDs.
+#
 
-feed: https://feedforall.com/sample.xml
 dummy: http://localhost:12356/feed/123
+feed: https://feedforall.com/sample.xml
+
