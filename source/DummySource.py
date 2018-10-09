@@ -12,7 +12,7 @@ class DummySource(Source):
 
   _feedURLs=[]
   _update_count=0
-  _next_item_id=1
+  _next_item_guid=1
   keepUpdateInterval=False  #: whether to keep the feed's original update intervals (default: False)
 
   @property
@@ -45,7 +45,7 @@ class DummySource(Source):
     if len(feed.items)>1:
       max=feed.items[0].publicationDate
       for item in feed.items[1:]:
-        if item.publicationDate>max:
+        if max==None or item.publicationDate!=None and item.publicationDate>max:
           max=item.publicationDate
       feed.lastChanged=max
     elif feed.lastChanged==None:
@@ -54,13 +54,13 @@ class DummySource(Source):
 
   def _createItem(self, feed:Feed) -> Item:
     item=Item()
-    item.id=self._next_item_id
-    self._next_item_id+=1
     item.feedID=feed.id
-    item.guid="urn://feedtrough/%d/%d"%(feed.id,item.id)
-    item.title="item %d title"%item.id
-    item.description="description for item %d"%item.id
-    item.itemURL="http://localhost:12356/feed/%d/item/%d"%(feed.id,item.id)
+    id=self._next_item_guid
+    self._next_item_guid+=1
+    item.guid="urn://feedtrough/%d/%d"%(feed.id,id)
+    item.title="item %d title"%id
+    item.description="description for item %d"%id
+    item.itemURL="http://localhost:12356/feed/%d/item/%d"%(feed.id,id)
     item.publicationDate=datetime.now()
     return item
 
@@ -81,20 +81,20 @@ class TestDummySource(unittest.TestCase):
   """Tests for DummySource.
   """
 
-  def testItemIDUniqueness(self):
-    """Tests whether generated item IDs are unique.
+  def testItemGUIDUniqueness(self):
+    """Tests whether generated item GUIDs are unique.
     """
     feed=Feed()
     feed.id=15
     source=DummySource()
     for tc in range(0,10):
       source.updateFeed(feed)
-    ids=[]
+    guids=[]
     for item in feed.items:
-      ids.append(item.id)
+      guids.append(item.guid)
 
-    self._assertHasEnoughItemsForTest(ids)
-    self.assertEqual(len(feed.items),len(set(ids)),"amount of feed items should equal number of unique IDs")
+    self._assertHasEnoughItemsForTest(guids)
+    self.assertEqual(len(feed.items),len(set(guids)),"amount of feed items should equal number of unique GUIDs")
 
   def _assertHasEnoughItemsForTest(self, items):
     self.assertGreater(len(items),2,"self-check: there should be at least 3 items available")

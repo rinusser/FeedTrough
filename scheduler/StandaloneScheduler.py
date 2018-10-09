@@ -78,7 +78,7 @@ class TestStandaloneScheduler(unittest.TestCase):
   def testUpdateOrder(self):
     """Tests whether the scheduler updates feeds in the correct order.
 
-    The combination of feed update intervals, DummySource's sequential item ID generation and DummySource's adding of items on
+    The combination of feed update intervals, DummySource's sequential item GUID generation and DummySource's adding of items on
     every other refresh results in deterministic article assignment in feeds. This is tested for here.
     """
     storage=InMemoryStorage()
@@ -108,5 +108,5 @@ class TestStandaloneScheduler(unittest.TestCase):
   def _assertItemIDs(self,expected_ids,feed):
     actual=[]
     for item in feed.items:
-      actual.append(item.id)
+      actual.append(int(item.guid[item.guid.rindex("/")+1:]))
     self.assertEqual(expected_ids,actual,"list of item IDs should match")
