@@ -48,6 +48,8 @@ class StandaloneScheduler(Scheduler):
     now=datetime.now()
     deltas=[]
     for feed in feeds:
+      if feed.updateInterval==None:
+        continue
       if feed.lastRefreshed!=None:
         next_update_at=feed.lastRefreshed+feed.updateInterval
       else:

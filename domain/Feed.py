@@ -17,6 +17,10 @@ class Feed:
   items=[]            #: items in this feed, as array of domain.Item objects
 
 
-  def __init__(self):
+  def __init__(self, id=None, sourceName=None, feedURL=None, updateInterval=None):
+    self.id=id
+    self.sourceName=sourceName
+    self.feedURL=feedURL
+    self.updateInterval=updateInterval
     self.items=[]
 
