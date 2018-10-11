@@ -10,3 +10,12 @@ class Item:
   itemURL=None         #: the item's URL, as string
   publicationDate=None #: the time this item was published, as datetime.datetime
 
+  def __init__(self, id=None, feedID=None, title=None):
+    """
+    :param Union[int,None] id: optional: the item's internal ID
+    :param Union[int,None] feedID: optional: the item parent feed's internal ID
+    :param Union[str,None] title: optional: the item's title
+    """
+    self.id=id
+    self.feedID=feedID
+    self.title=title

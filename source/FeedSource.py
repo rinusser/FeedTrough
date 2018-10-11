@@ -161,8 +161,7 @@ class TestFeedSource(unittest.TestCase):
     self.assertEqual(expected,strftime("%Y-%m-%d %H:%M:%S",dt.utctimetuple()))
 
   def _readFeed(self,url):
-    feed=Feed()
-    feed.feedURL=url
+    feed=Feed(feedURL=url)
     source=FeedSource()
     source.updateFeed(feed)
     return feed

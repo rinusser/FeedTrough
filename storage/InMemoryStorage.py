@@ -68,12 +68,8 @@ class TestInMemoryStorage(BaseStorageTest,unittest.TestCase):
     """
     storage1=self._createStorage()
     storage2=self._createStorage()
-    feed=Feed()
-    feed.id=2
-    feed.sourceName="test"
-    feed.title="asdf"
+    feed=Feed(id=2,sourceName="test",feedURL="uri://test",title="asdf")
     feed.items=[Item()]
-    feed.feedURL="uri://test"
     storage1.putFeed(feed)
 
     contents1=storage1.getFeeds()

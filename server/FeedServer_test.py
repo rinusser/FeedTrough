@@ -15,23 +15,13 @@ class TestFeedServer(unittest.TestCase):
     """test class fixture, called by unittest.
     """
     storage=InMemoryStorage()
-    feed1=Feed()
-    feed1.id=10
-    feed1.title="feed 10"
+    feed1=Feed(id=10,title="feed 10")
     storage.putFeed(feed1)
 
-    feed2=Feed()
-    feed2.id=20
-    feed2.title="feed 20"
-    item21=Item()
-    item21.id=201
-    item21.feedID=20
-    item21.title="title 20.1"
+    feed2=Feed(id=20,title="feed 20")
+    item21=Item(id=201,feedID=20,title="title 20.1")
     feed2.items.append(item21)
-    item22=Item()
-    item22.id=202
-    item22.feedID=20
-    item22.title="title 20.2"
+    item22=Item(id=202,feedID=20,title="title 20.2")
     item22.description="\u00ef\u4eba"
     feed2.items.append(item22)
     storage.putFeed(feed2)

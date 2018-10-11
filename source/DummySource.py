@@ -84,8 +84,7 @@ class TestDummySource(unittest.TestCase):
   def testItemGUIDUniqueness(self):
     """Tests whether generated item GUIDs are unique.
     """
-    feed=Feed()
-    feed.id=15
+    feed=Feed(id=15)
     source=DummySource()
     for tc in range(0,10):
       source.updateFeed(feed)
@@ -103,10 +102,8 @@ class TestDummySource(unittest.TestCase):
   def testFeedIDIsSetCorrectly(self):
     """Tests whether items' feed ID is set correctly.
     """
-    feed1=Feed()
-    feed1.id=20
-    feed2=Feed()
-    feed2.id=21
+    feed1=Feed(id=20)
+    feed2=Feed(id=21)
     source=DummySource()
 
     for tc in range(0,10):

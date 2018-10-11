@@ -31,15 +31,9 @@ class BaseStorageTest(ABC):
     """Tests whether .putFeed() stores data independently from live objects.
     """
     storage=self._createStorage()
-    feed=Feed()
-    feed.id=123
-    feed.sourceName="test"
-    feed.feedURL="uri://test"
-    feed.title="original feed title"
+    feed=Feed(id=123,sourceName="test",feedURL="uri://test",title="original feed title")
 
-    item1=Item()
-    item1.id=456
-    item1.title="original item title"
+    item1=Item(id=456,title="original item title")
     feed.items=[item1]
 
     storage.putFeed(feed)
@@ -63,19 +57,12 @@ class BaseStorageTest(ABC):
     """Tests whether .putItem() properly adds items.
     """
     storage=self._createStorage()
-    feed=Feed()
-    feed.id=9
-    feed.sourceName="test"
-    feed.feedURL="uri://test"
-    item1=Item()
-    item1.id=11
-    item1.feedID=9
+    feed=Feed(id=9,sourceName="test",feedURL="uri://test")
+    item1=Item(id=11,feedID=9)
     feed.items=[item1]
     storage.putFeed(feed)
 
-    item2=Item()
-    item2.id=12
-    item2.feedID=9
+    item2=Item(id=12,feedID=9)
     storage.putItem(item2)
 
     stored=storage.getFeedByID(9)

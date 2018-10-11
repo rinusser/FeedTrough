@@ -96,9 +96,7 @@ class Runner:
     unhandled_specs=set(self._feedSpecs)-set(handled_specs)
     for type,url in unhandled_specs:
       log.info("got new source: type %s, url %s",type,url)
-      feed=Feed()
-      feed.sourceName=type
-      feed.feedURL=url
+      feed=Feed(sourceName=type,feedURL=url)
       feed.updateInterval=timedelta(minutes=5)
       self._storage.putFeed(feed)
 

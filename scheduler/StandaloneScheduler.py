@@ -100,8 +100,7 @@ class TestStandaloneScheduler(unittest.TestCase):
     self._assertItemIDs([2],  actuals[1])
 
   def _storeFeed(self,source,storage,id,last_refreshed,update_interval):
-    feed=Feed()
-    feed.id=id
+    feed=Feed(id=id)
     source.updateFeed(feed,skip_items=True)
     feed.lastRefreshed=last_refreshed
     feed.updateInterval=timedelta(seconds=update_interval)
