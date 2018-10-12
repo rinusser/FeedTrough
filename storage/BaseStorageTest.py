@@ -36,7 +36,9 @@ class BaseStorageTest(ABC):
     item1=Item(id=456,title="original item title")
     feed.items=[item1]
 
+    storage.acquireWriteLock()
     storage.putFeed(feed)
+    storage.releaseWriteLock()
 
     feed.id=78
     feed.title="lalala"
@@ -60,10 +62,12 @@ class BaseStorageTest(ABC):
     feed=Feed(id=9,sourceName="test",feedURL="uri://test")
     item1=Item(id=11,feedID=9)
     feed.items=[item1]
+    storage.acquireWriteLock()
     storage.putFeed(feed)
 
     item2=Item(id=12,feedID=9)
     storage.putItem(item2)
+    storage.releaseWriteLock()
 
     stored=storage.getFeedByID(9)
     self.assertEqual(2, len(stored.items), "stored feed should have gotten additional item")

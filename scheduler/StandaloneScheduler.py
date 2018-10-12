@@ -70,7 +70,9 @@ class StandaloneScheduler(Scheduler):
 
   def _updateFeed(self, feed:Feed):
     self._sources[feed.sourceName].updateFeed(feed)
+    self._storage.acquireWriteLock()
     self._storage.putFeed(feed)
+    self._storage.releaseWriteLock()
 
 
 class TestStandaloneScheduler(unittest.TestCase):

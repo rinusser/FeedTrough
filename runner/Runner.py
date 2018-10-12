@@ -72,6 +72,7 @@ class Runner:
   def _compileFeeds(self):
     stored_feeds=self._storage.getFeeds()
     handled_specs=[]
+    self._storage.acquireWriteLock()
     for feed in stored_feeds:
       spec=(feed.sourceName,feed.feedURL)
       active=spec in self._feedSpecs
@@ -99,6 +100,7 @@ class Runner:
       feed=Feed(sourceName=type,feedURL=url)
       feed.updateInterval=timedelta(minutes=5)
       self._storage.putFeed(feed)
+    self._storage.releaseWriteLock()
 
 
 class TestRunner(unittest.TestCase):
@@ -110,9 +112,13 @@ class TestRunner(unittest.TestCase):
     """
     storage=SQLiteStorage(":memory:")
     interval=timedelta(seconds=60)
+
+    storage.acquireWriteLock()
     storage.putFeed(Feed(id=1,sourceName="dummy",feedURL="f1",updateInterval=interval))
     storage.putFeed(Feed(id=2,sourceName="dummy",feedURL="f2",updateInterval=None))
     storage.putFeed(Feed(id=3,sourceName="other",feedURL="f3",updateInterval=interval))
+    storage.releaseWriteLock()
+
     sources=[DummySource()]
     feed_specs=[("dummy","f2"),("dummy","f3")]
 

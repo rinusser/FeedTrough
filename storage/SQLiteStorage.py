@@ -1,6 +1,9 @@
 import sqlite3
 from datetime import datetime, timedelta, timezone
+import os
 import sys
+from time import sleep
+from threading import local, Timer
 from typing import List, Union
 import unittest
 
@@ -14,13 +17,25 @@ log=get_logger(__name__)
 
 class SQLiteStorage(Storage):
   """Persistent storage implementation using an SQLite backend.
+
+  This is safe for use in multithreaded environments. Each thread will open its own connection handle to the database file, as
+  a result the sqlite's special ":memory:" file won't work across multiple threads - use a temporary local file instead.
   """
 
-  _conn=None
+  _filename=None
+  _threadlocal=None
 
   def __init__(self, filename:str):
-    self._conn=sqlite3.connect(filename,check_same_thread=False)
+    super().__init__()
+    self._filename=filename
+    self._threadlocal=local()
+    self._getConnection()
     self._setupSchema()
+
+  def _getConnection(self):
+    if not hasattr(self._threadlocal,"conn"):
+      self._threadlocal.conn=sqlite3.connect(self._filename)
+    return self._threadlocal.conn
 
 
   def getFeeds(self) -> List[Feed]:
@@ -28,7 +43,7 @@ class SQLiteStorage(Storage):
 
     :rtype: List[Feed]
     """
-    c=self._conn.cursor()
+    c=self._getConnection().cursor()
     query="SELECT id,sourceName,feedURL,updateInterval,title,description,websiteURL,lastRefreshed,lastChanged FROM feeds"
     c.execute(query)
     rv=[]
@@ -45,7 +60,7 @@ class SQLiteStorage(Storage):
     :param int id: the feed ID to look up
     :rtype: Feed or None
     """
-    c=self._conn.cursor()
+    c=self._getConnection().cursor()
     query="SELECT id,sourceName,feedURL,updateInterval,title,description,websiteURL,lastRefreshed,lastChanged FROM feeds WHERE id=?"
     #             0  1          2       3              4     5           6          7             8
     c.execute(query,(id,))
@@ -76,9 +91,14 @@ class SQLiteStorage(Storage):
 
     If the feed comes with items, the items are stored as well.
 
+    To assure thread-safety you need to get a lock by calling .acquireWriteLock() first.
+
     :param Feed feed: the Feed to store
+    :raises AssertionError: if acquireWriteLock() wasn't called before this method
     """
-    c=self._conn.cursor()
+    self._assertIsWriteLocked()
+    conn=self._getConnection()
+    c=conn.cursor()
     query=self._insertReplace(feed.id,"""%s INTO feeds
                                     (id,sourceName,feedURL,updateInterval,title,description,websiteURL,lastRefreshed,lastChanged)
                              VALUES (?, ?,         ?,      ?,             ?,    ?,          ?,         ?,            ?)""")
@@ -93,14 +113,14 @@ class SQLiteStorage(Storage):
          self._datetimeToSQL(feed.lastRefreshed),
          self._datetimeToSQL(feed.lastChanged))
     c.execute(query,row)
-    self._conn.commit()
+    conn.commit()
     if feed.id==None:
       feed.id=c.lastrowid
 
     for item in feed.items:
       item.feedID=feed.id
       self._putItem(item,c)
-    self._conn.commit()
+    conn.commit()
     c.close()
 
   def getItemsByFeedID(self, feed_id:int) -> List[Item]:
@@ -110,7 +130,7 @@ class SQLiteStorage(Storage):
     :rtype: List[Item]
     """
     rv=[]
-    c=self._conn.cursor()
+    c=self._getConnection().cursor()
     query="SELECT id,feedID,guid,title,description,itemURL,publicationDate FROM items WHERE feedID=?"
     #             0  1      2    3     4           5       6
     for row in c.execute(query,(feed_id,)):
@@ -156,18 +176,23 @@ class SQLiteStorage(Storage):
 
     TODO: improve handling of orphaned items, probably throw exception
 
+    To assure thread-safety you need to get a lock by calling .acquireWriteLock() first.
+
     :param Item item: the item to store
+    :raises AssertionError: if acquireWriteLock() wasn't called before this method
     """
+    self._assertIsWriteLocked()
     feed=self.getFeedByID(item.feedID)
     if feed==None:
       return
-    c=self._conn.cursor()
+    conn=self._getConnection()
+    c=conn.cursor()
     self._putItem(item,c)
-    self._conn.commit()
+    conn.commit()
     c.close()
 
   def _setupSchema(self):
-    c=self._conn.cursor()
+    c=self._getConnection().cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS feeds (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                    sourceName TEXT NOT NULL,
                                                    feedURL TEXT NOT NULL,
@@ -228,6 +253,13 @@ class SQLiteStorage(Storage):
       return None
     return obj.isoformat(" ")
 
+  def close(self):
+    """Closes the (thread-local) SQLite connection.
+
+    This method is mainly useful for multihreaded tests.
+    """
+    self._getConnection().close()
+
 
 class TestSQLiteStorage(BaseStorageTest,unittest.TestCase):
   """Tests for the SQLiteStorage class.
@@ -252,9 +284,11 @@ class TestSQLiteStorage(BaseStorageTest,unittest.TestCase):
     item.publicationDate=datetime(2016,1,2,3,4,5,60708)
     feed.items=[item]
 
+    storage.acquireWriteLock()
     storage.putFeed(feed)
+    storage.releaseWriteLock()
 
-    c=storage._conn.cursor()
+    c=storage._getConnection().cursor()
     c.execute("SELECT id,updateInterval,lastRefreshed,lastChanged FROM feeds WHERE id=1")
     feed_row=c.fetchone()
     self.assertIsNotNone(feed_row,"should have found a 'feeds' row")
@@ -266,4 +300,81 @@ class TestSQLiteStorage(BaseStorageTest,unittest.TestCase):
     item_row=c.fetchone()
     self.assertIsNotNone(item_row,"should have found an 'items' row")
     self.assertEqual("2016-01-02 03:04:05.060708",item_row[1],"stored publicationDate should be in expected date format")
+
+
+  def testPutFeedWriteLock(self):
+    """Checks whether putFeed() respects write locks.
+    """
+
+    def setup(storage):
+      pass
+
+    data=[Feed(title="feed 1",sourceName="test",feedURL="1"),
+          Feed(title="feed 2",sourceName="test",feedURL="2"),
+          Feed(title="feed 3",sourceName="test",feedURL="3")]
+
+    def asserter(storage):
+      feeds=storage.getFeeds()
+      self.assertEqual(3,len(feeds))
+      self.assertEqual("feed 1",feeds[0].title,"should be first either way")
+      self.assertEqual("feed 2",feeds[1].title,"the earlier lock should have guaranteed this is inserted at 2nd place")
+      self.assertEqual("feed 3",feeds[2].title,"delayed timer function should have added its data at the end")
+
+    self._performWriteLockTest(setup,data,"putFeed",asserter)
+
+  def testPutItemWriteLock(self):
+    """Checks whether putItem() respects write locks.
+    """
+
+    def setup(storage):
+      storage.acquireWriteLock()
+      storage.putFeed(Feed(id=4,title="feed",sourceName="test",feedURL="4"))
+      storage.releaseWriteLock()
+
+    data=[Item(title="item 1",feedID=4),
+          Item(title="item 2",feedID=4),
+          Item(title="item 3",feedID=4)]
+
+    def asserter(storage):
+      feed=storage.getFeedByID(4)
+      self.assertEqual(3,len(feed.items))
+      self.assertEqual("item 1",feed.items[0].title,"should be first either way")
+      self.assertEqual("item 2",feed.items[1].title,"earlier lock should have assured this is second")
+      self.assertEqual("item 3",feed.items[2].title,"background thread should have been delayed")
+
+    self._performWriteLockTest(setup,data,"putItem",asserter)
+
+  def _performWriteLockTest(self, setup, data, putter_name, asserter):
+    filename="test."+__name__+".sqlite"
+    if os.path.isfile(filename):
+      os.remove(filename)
+    storage=SQLiteStorage(filename) #we're doing multithreaded accesses, this requires a local file
+    putter=getattr(storage,putter_name)
+
+    setup(storage)
+
+    def later():
+      storage.acquireWriteLock()
+      putter(data[2])
+      storage.releaseWriteLock()
+    timer=Timer(1,later)
+    timer.start()
+
+    storage.acquireWriteLock()
+    putter(data[0])
+
+    # the timer calling later() will be called during this sleep() period. If the locks are working as expected the timer will
+    # have to wait until our lock is released further down, only then insert its data.
+    sleep(2)
+
+    putter(data[1])
+    storage.releaseWriteLock()
+    # at this point the timer should get its lock and start adding data.
+
+    timer.join()
+
+    asserter(storage)
+    storage.close()
+
+    os.remove(filename)
 

@@ -14,6 +14,7 @@ class InMemoryStorage(Storage):
   _feeds=[]
 
   def __init__(self):
+    super().__init__()
     self._feeds=[]
 
   def getFeeds(self) -> List[Feed]:
