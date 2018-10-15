@@ -3,6 +3,7 @@ from storage import *
 
 
 if __name__=="__main__":
-  runner=Runner(SQLiteStorage("feeds.sqlite"))
+  configuration=parse_cli_arguments()
+  runner=Runner(storage=SQLiteStorage("feeds.sqlite"),configuration=configuration)
   runner.run()
 

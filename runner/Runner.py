@@ -6,6 +6,7 @@ import unittest
 
 from domain import *
 import logger
+from runner import *
 from scheduler import *
 from server import *
 from source import *
@@ -23,10 +24,13 @@ class Runner:
   _sources=None
   _storage=None
   _feedSpecs=[]
-  _runTime=60
+
+  _runTime=None
+  _logLevel=None
+  _configuration=None
 
 
-  def __init__(self, storage:Storage, sources:Union[List[Source],None]=None, feedSpecs=None, runTime:int=60):
+  def __init__(self, storage:Storage, sources:Union[List[Source],None]=None, feedSpecs=None, configuration:Union[Configuration,None]=None):
     """
     :param Storage storage: the storage backend to use
     :param Union[List[Source],None] sources: a list of sources for reading feeds (defaul: all built-in)
@@ -45,13 +49,17 @@ class Runner:
     else:
       self._feedSpecs=config.sources
 
-    self._runTime=runTime
+    if configuration==None:
+      configuration=Configuration()
+    self._configuration=configuration
+    self._runTime=configuration.runTime
+    self._logLevel=configuration.logLevel
 
 
   def run(self):
     """Starts the application.
     """
-    logger.register_handler(logging.INFO)
+    logger.register_handler(self._logLevel)
 
     self._compileFeeds()
 
@@ -59,10 +67,15 @@ class Runner:
     scheduler.start()
 
     server=FeedServer(self._storage)
+    server.port=self._configuration.serverPort
     server.start()
 
     try:
-      sleep(self._runTime)
+      if self._runTime>0:
+        sleep(self._runTime)
+      else:
+        while True:
+          server.join(5)  #XXX maybe there is a better way of allowing KeyboardInterrupts without changing to non-daemon threads
     except KeyboardInterrupt:
       pass
 

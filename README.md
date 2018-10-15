@@ -31,7 +31,7 @@ PyRSS2Gen (`pip install pyrss2gen`) are installed.
 
 # Usage
 
-Run `run.py`. This might change in the future: the code is still a work in progress.
+Run `run.py`. The command-line interface supports a few arguments: running `run.py -h` will show the help screen.
 
 ### Configuration
 
